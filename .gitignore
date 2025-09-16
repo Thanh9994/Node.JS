@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+.env.*
+
+# build output
+dist/
+build/
+
+# package manager
+pnpm-lock.yaml
+.pnpm-workspace-state-v1.json
+.modules.yaml
