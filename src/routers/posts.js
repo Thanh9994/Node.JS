@@ -13,7 +13,7 @@ postsRouter.delete("/:id", postsController.deletePost);
 
 postsRouter.put("/:id", postsController.updatePost);
 
-postsRouter.post("/", postsController.addPost); // new post để tạo bài viết mới
+postsRouter.post("/", postsController.addPost); // new post
 
 
 export default postsRouter;
@@ -34,3 +34,4 @@ export default postsRouter;
 //     const title = req.query.title || "Bài viết mới"; // Lấy giá trị 'title' từ query string
 //     res.json({ message: `Tạo bài viết với tiêu đề: ${title}` }); // Trả về JSON với tiêu đề bài viết
 // });
+
