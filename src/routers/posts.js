@@ -13,7 +13,7 @@ postsRouter.delete("/:id", postsController.deletePost);
 
 postsRouter.put("/:id", postsController.updatePost);
 
-postsRouter.post("/", postsController.addPost); // new post để tạo bài viết mới
+postsRouter.post("/", postsController.addPost); // new post để tạo bài viết mới và thêm vào mảng posts
 
 
 export default postsRouter;
