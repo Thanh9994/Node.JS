@@ -7,6 +7,8 @@ const postsRouter = Router();
 
 postsRouter.get("/", postsController.getPosts);
 
+postsRouter.get("/search", postsController.searchPosts);
+
 postsRouter.get("/:id", postsController.getPostById);
 
 postsRouter.delete("/:id", postsController.deletePost);

@@ -31,7 +31,7 @@ export const postsController = {
             id: posts.length + 1,
             title,
             content
-        };``
+        };
         posts.push(newPost);
         res.status(201).json({
             message: "Bài viết đã được thêm",
@@ -60,5 +60,15 @@ export const postsController = {
         }
         const deletedPost = posts.splice(postIndex, 1)[0];
         res.json({ message: "Xóa bài viết thành công", deleted: deletedPost });
+    },
+    searchPosts: (req, res) => {
+        const query = req.query.q?.toLowerCase() || "";
+        const filteredPosts = posts.filter(p =>
+            p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query)
+        );
+        res.json({
+            message: `Kết quả tìm kiếm cho "${query}"`,
+            posts: filteredPosts
+        });
     }
 };
