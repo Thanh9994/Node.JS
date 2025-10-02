@@ -1,74 +1,103 @@
-import { request,response } from "express";
-
-const posts = [
-    { id: 1, title: "Bài viết 1", content: "Nội dung bài viết 1" },
-    { id: 2, title: "Bài viết 2", content: "Nội dung bài viết 2" },
-    { id: 3, title: "Bài viết 3", content: "Nội dung bài viết 3" }
-];
+// src/controllers/posts.controller.js
+import { Request, Response } from "express";
+import Post from "../models/postsModels.js";
 
 export const postsController = {
-    getPosts: (req, res) => {
-        res.json({
-            message: "Danh sách bài viết",
-            posts: posts
-        });
-    },
-    getPostById: (req, res) => {
-        const id = parseInt(req.params.id, 10);
-        const post = posts.find(p => p.id === id);
-        if (!post) {
-            return res.status(404).json({ message: "Bài viết không tồn tại" });
-        }
-        res.json({
-            message: "Chi tiết bài viết",
-            posts: [post]
-        });
-    },
-    addPost: (req, res) => {
-        console.log(req.body);
-        const { title, content } = req.body;    
-        const newPost = {
-            id: posts.length + 1,
-            title,
-            content
-        };
-        posts.push(newPost);
-        res.status(201).json({
-            message: "Bài viết đã được thêm",
-            post: newPost
-        });
-    },
-    updatePost: (req, res) => {
-        const id = Number(req.params.id);
-        const index = posts.findIndex(p => p.id === id);
+  // GET /posts?_page=1&_limit=10&q=abc&sortBy=createdAt&order=desc
+  async getPosts(req, res) {
+    try {
+      const page  = Math.max(parseInt(req.query._page) || 1, 1);
+      const limit = Math.max(parseInt(req.query._limit) || 10, 1);
+      const skip  = (page - 1) * limit;
 
-        if (index === -1) {
-            return res.status(404).json({ message: "Bài viết không tồn tại" });
-        }   
-        const { title, content } = req.body ?? {};
-        if (typeof title !== "string" || typeof content !== "string") {
-            return res.status(400).json({ message: "Thiếu title hoặc content" });
-        }
-        posts[index] = { id, title, content };
-        res.json({ message: "Cập nhật bài viết thành công", post: posts[index] });
-    },
-    deletePost: (req, res) => {
-        const id = parseInt(req.params.id, 10);
-        const postIndex = posts.findIndex(p => p.id === id);
-        if (postIndex === -1) {
-            return res.status(404).json({ message: "Bài viết không tồn tại" });
-        }
-        const deletedPost = posts.splice(postIndex, 1)[0];
-        res.json({ message: "Xóa bài viết thành công", deleted: deletedPost });
-    },
-    searchPosts: (req, res) => {
-        const query = req.query.q?.toLowerCase() || "";
-        const filteredPosts = posts.filter(p =>
-            p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query)
-        );
-        res.json({
-            message: `Kết quả tìm kiếm cho "${query}"`,
-            posts: filteredPosts
-        });
+      const filter = {};
+      if (req.query.q) {
+        filter.title = { $regex: String(req.query.q), $options: "i" }; // không phân biệt hoa thường
+      }
+
+      const sort = {};
+      const sortBy = (req.query.sortBy) || "createdAt";
+      const order  = String(req.query.order).toLowerCase() === "asc" ? 1 : -1;
+      sort[sortBy] = order;
+
+      const [total, posts] = await Promise.all([
+        Post.countDocuments(filter),
+        Post.find(filter).sort(sort).skip(skip).limit(limit)
+      ]);
+
+      res.json({ message: "Danh sách bài viết", total, page, limit, posts });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi server", error: err.message });
     }
+  },
+
+  // GET /posts/:id  (tự tăng viewCount +1 mỗi lần xem)
+  async getPostById(req, res) {
+    try {
+      const post = await Post.findByIdAndUpdate(
+        req.params.id,
+        { $inc: { viewCount: 1 } },
+        { new: true }
+      );
+      if (!post) return res.status(404).json({ message: "Bài viết không tồn tại" });
+      res.json({ message: "Chi tiết bài viết", post });
+    } catch (err) {
+      res.status(400).json({ message: "ID không hợp lệ", error: err.message });
+    }
+  },
+
+  // POST /posts
+  async addPost(req, res) {
+    try {
+      const { title, content, isPublished } = req.body ?? {};
+      if (typeof title !== "string" || typeof content !== "string") {
+        return res.status(400).json({ message: "Thiếu hoặc sai 'title' / 'content' (string)" });
+      }
+      const post = await Post.create({
+        title: title.trim(),
+        content: content.trim(),
+        isPublished: Boolean(isPublished)
+      });
+      res.status(201).json({ message: "Tạo bài viết thành công", post });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi server", error: err.message });
+    }
+  },
+
+  // PUT /posts/:id (cập nhật toàn bộ)
+  async updatePost(req, res) {
+    try {
+      const updated = await Post.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true
+      });
+      if (!updated) return res.status(404).json({ message: "Bài viết không tồn tại" });
+      res.json({ message: "Cập nhật bài viết thành công", post: updated });
+    } catch (err) {
+      res.status(400).json({ message: "ID không hợp lệ", error: err.message });
+    }
+  },
+
+  // DELETE /posts/:id
+  async deletePost(req, res) {
+    try {
+      const deleted = await Post.findByIdAndDelete(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Bài viết không tồn tại" });
+      res.json({ message: "Xóa bài viết thành công", deleted });
+    } catch (err) {
+      res.status(400).json({ message: "ID không hợp lệ", error: err.message });
+    }
+  },
+
+  // (Tuỳ chọn) GET /posts/search?q=...
+  async searchPosts(req, res) {
+    try {
+      const q = String(req.query.q || "");
+      if (!q) return res.status(400).json({ message: "Vui lòng truyền ?q=" });
+      const posts = await Post.find({ title: { $regex: q, $options: "i" } });
+      res.json({ message: `Kết quả tìm kiếm cho "${q}"`, posts });
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi server", error: err.message });
+    }
+  }
 };
