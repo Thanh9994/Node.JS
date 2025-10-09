@@ -1,5 +1,7 @@
 import { Router } from "express";
 import {postsController} from "../controllers/postsController.js";
+import { validateAddSchema, validateUpadateSchema } from "../validation/posts.validation.js";
+import { validateRequest } from "../middleware/validationRequest.js";
 
 
 const postsRouter = Router();
@@ -13,9 +15,11 @@ postsRouter.get("/:id", postsController.getPostById);
 
 postsRouter.delete("/:id", postsController.deletePost);
 
-postsRouter.put("/:id", postsController.updatePost);
+postsRouter.put("/:id", validateRequest(validateUpadateSchema), postsController.updatePost);
 
-postsRouter.post("/", postsController.addPost); // new post để tạo bài viết mới và thêm vào mảng posts
+postsRouter.post("/", validateRequest(validateAddSchema), postsController.addPost);// new post để tạo bài viết mới và thêm vào mảng posts
+
+// postsRouter.patch("/:id", postsController.patchPost);
 
 
 export default postsRouter;
