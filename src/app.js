@@ -54,6 +54,7 @@ app.use(express.urlencoded({ extended: true })); // Middleware để phân tích
 app.use("/posts", postsRouter); // Định nghĩa route chính bắt đầu bằng /api
 app.use("/products", productsRouter); // Định nghĩa route cho sản phẩm
 app.use("/users", usersRouter); // Định nghĩa route cho người dùng
+app.use("/author", usersRouter); // Định nghĩa route cho tác giả
 
 app.use("/", (req, res) => {
     res.json({
@@ -61,7 +62,8 @@ app.use("/", (req, res) => {
         endpoints: {
             posts: "/posts",
             users: "/users",
-            products: "/products"
+            products: "/products",
+            author: "/author"
         }
     });
 });
