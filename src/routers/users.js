@@ -1,14 +1,12 @@
 import { Router } from "express";
+import { getAll, login, signUp } from "../controllers/users.controller";
 
-const usersRouter = Router();
+const userRouter = Router();
 
-usersRouter.get("/", (req, res) => {
-    res.send("Danh sách người dùng");
-});
+userRouter.post("/sigup", signUp )
 
-usersRouter.get("/:id", (req, res) => {
-    const id = req.params.id;
-    res.json({ id, message: "Chi tiết người dùng" });
-});
+userRouter.post("/login", login )
 
-export default usersRouter;
+userRouter.get("/", getAll )
+
+export default userRouter

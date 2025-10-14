@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {postsController} from "../controllers/postsController.js";
+import {postsController} from "../controllers/posts.controller.js";
 import { validateAddSchema, validateUpadateSchema } from "../validation/posts.validation.js";
 import { validateRequest } from "../middleware/validationRequest.js";
 

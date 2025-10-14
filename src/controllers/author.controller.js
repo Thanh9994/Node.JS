@@ -1,4 +1,4 @@
-import Author from "../models/Author";
+import Author from "../models/author.js";
 
 export async function getAuthors(req, res) {
   // Author.find()

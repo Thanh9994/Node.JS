@@ -5,7 +5,7 @@ import {
   getAuthorById,
   getAuthors,
   updateAuthor,
-} from "../controllers/author";
+} from "../controllers/author.controller.js";
 import { validateRequest } from "../middleware/validationRequest";
 import { authorAddSchema, authorUpdateSchema } from "../validation/author.validation";
 

@@ -35,15 +35,16 @@ import express from "express";
 import dotenv from "dotenv";
 import postsRouter from "./routers/posts";
 import productsRouter from "./routers/products.js";
-import usersRouter from "./routers/users.js";
 import morgan from "morgan";
 import mongoose from "mongoose";
+import authorRouter from "./routers/author.js";
+import userRouter from "./routers/users.js"
 
 dotenv.config();
 const app = express();
 
 mongoose
-  .connect("mongodb://localhost:27017/my_database")
+  .connect("mongodb://localhost:27017/NodeJS")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB:", err));
 
@@ -53,8 +54,8 @@ app.use(express.urlencoded({ extended: true })); // Middleware để phân tích
 
 app.use("/posts", postsRouter); // Định nghĩa route chính bắt đầu bằng /api
 app.use("/products", productsRouter); // Định nghĩa route cho sản phẩm
-app.use("/users", usersRouter); // Định nghĩa route cho người dùng
-app.use("/author", usersRouter); // Định nghĩa route cho tác giả
+app.use("/users", userRouter); // Định nghĩa route cho người dùng
+app.use("/author", authorRouter); // Định nghĩa route cho tác giả
 
 app.use("/", (req, res) => {
     res.json({
@@ -71,3 +72,17 @@ app.use("/", (req, res) => {
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
+
+// export default validateAddAuthorSchema = Joi.object({
+//     name: Joi.string().min(3).max(30).required().messages({
+//         "string.base": "Tên tác giả phải là chuỗi ký tự",
+//         "string.empty": "Tên tác giả không được để trống",
+//         "string.min": "Tên tác giả phải có ít nhất {#limit} ký tự",
+//         "string.max": "Tên tác giả không được vượt quá {#limit} ký tự",
+//         "any.required": "Tên tác giả là bắt buộc"
+//     }),
+//     bio: Joi.string().max(500).messages({
+//         "string.base": "Tiểu sử tác giả phải là chuỗi ký tự",
+//         "string.max": "Tiểu sử tác giả không được vượt quá {#limit} ký tự"
+//     })
+// });
