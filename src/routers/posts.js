@@ -2,22 +2,23 @@ import { Router } from "express";
 import {postsController} from "../controllers/posts.controller.js";
 import { validateAddSchema, validateUpadateSchema } from "../validation/posts.validation.js";
 import { validateRequest } from "../middleware/validationRequest.js";
+import { adminMiddleware, authMiddleware } from "../middleware/auth.middleware.js";
 
 
 const postsRouter = Router();
 
 
-postsRouter.get("/", postsController.getPosts);
+postsRouter.get("/", authMiddleware, postsController.getPosts);
 
 postsRouter.get("/search", postsController.searchPosts);
 
 postsRouter.get("/:id", postsController.getPostById);
 
-postsRouter.delete("/:id", postsController.deletePost);
+postsRouter.delete("/:id", adminMiddleware, postsController.deletePost);
 
-postsRouter.put("/:id", validateRequest(validateUpadateSchema), postsController.updatePost);
+postsRouter.put("/:id", adminMiddleware, validateRequest(validateUpadateSchema), postsController.updatePost);
 
-postsRouter.post("/", validateRequest(validateAddSchema), postsController.addPost);// new post để tạo bài viết mới và thêm vào mảng posts
+postsRouter.post("/",  validateRequest(validateAddSchema), postsController.addPost);// new post để tạo bài viết mới và thêm vào mảng posts
 
 // postsRouter.patch("/:id", postsController.patchPost);
 
