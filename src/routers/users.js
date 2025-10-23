@@ -8,6 +8,6 @@ userRouter.post("/signup", signUp )
 
 userRouter.post("/login", login )
 
-userRouter.get("/", authMiddleware, adminMiddleware, getAll )
+userRouter.get("/me", authMiddleware, adminMiddleware, getAll )
 
 export default userRouter

@@ -8,15 +8,15 @@ import { adminMiddleware, authMiddleware } from "../middleware/auth.middleware.j
 const postsRouter = Router();
 
 
-postsRouter.get("/", authMiddleware, postsController.getPosts);
+postsRouter.get("/", authMiddleware, authMiddleware, postsController.getPosts);
 
 postsRouter.get("/search", postsController.searchPosts);
 
 postsRouter.get("/:id", postsController.getPostById);
 
-postsRouter.delete("/:id", adminMiddleware, postsController.deletePost);
+postsRouter.delete("/:id",authMiddleware, adminMiddleware, postsController.deletePost);
 
-postsRouter.put("/:id", adminMiddleware, validateRequest(validateUpadateSchema), postsController.updatePost);
+postsRouter.put("/:id",authMiddleware, adminMiddleware, validateRequest(validateUpadateSchema), postsController.updatePost);
 
 postsRouter.post("/",  validateRequest(validateAddSchema), postsController.addPost);// new post để tạo bài viết mới và thêm vào mảng posts
 
